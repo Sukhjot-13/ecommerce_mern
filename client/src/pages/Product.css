@@ -1,0 +1,29 @@
+.productPage {
+	padding: 20px;
+	background-color: #f9f9f9;
+}
+
+.productGrid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	justify-content: center;
+}
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+}
+
+.pagination button {
+	margin: 0 5px;
+	padding: 10px 15px;
+	border: none;
+	background-color: #2d034b;
+	color: white;
+	cursor: pointer;
+}
+
+.pagination button.active {
+	background-color: #ff6347; /* Active page color */
+}

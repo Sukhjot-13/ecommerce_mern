@@ -1,0 +1,308 @@
+.signUpContainer,
+.signUpContainer * {
+	box-sizing: content-box !important;
+	word-wrap: normal !important;
+}
+.signUpContainer {
+	display: flex;
+	flex-direction: row;
+	/* background: linear-gradient(to left, #7bd1fe 0%, #5485ff 100%); */
+	background-color: white;
+	width: 65%;
+	margin: auto;
+	overflow: hidden;
+	border-radius: 1rem;
+	align-items: center;
+	/* justify-content: center; */
+	box-shadow: 20px 18px rgb(249, 243, 243);
+	/* box-sizing: content-box !important; */
+}
+.signAvatar {
+	/* temporary */
+	/* background: linear-gradient(to right, #ff7e5f 0%, #feb47b 100%); */
+	background: #1e083b;
+	clip-path: polygon(0 0, 80% 0, 46% 100%, 0% 100%);
+	display: flex;
+	flex-direction: column;
+	padding: 80px 135px;
+	padding-left: 0px;
+	/* align-items: center; */
+	width: 40%;
+	color: white;
+}
+.signAvatar p {
+	text-align: center;
+	max-width: 80%;
+	width: 80%;
+	font-size: 3rem;
+	margin: 0;
+	margin-bottom: 50px;
+}
+.signAvatarContainer {
+	width: 80%;
+	padding-left: 9%;
+	margin-top: 10%;
+}
+.signAvatarContainer svg {
+	width: 150px;
+	height: 150px;
+}
+.signDetails {
+	display: flex;
+	/* justify-content: center; */
+	align-items: center;
+	flex-direction: column;
+	background-color: #f0f0f0;
+	/* background-color: rgb(220, 131, 131); */
+	/* width: 100%; */
+	padding: 5px 15px;
+	padding-top: 10%;
+	border-radius: 22px;
+	position: relative;
+	/* margin-top: 8%;
+	margin-bottom: 3%; */
+	/* background: linear-gradient(to left, #7bd1fe 0%, #5485ff 100%); */
+}
+.signDetailsIconContainer {
+	position: absolute; /* Position the icon absolutely */
+	top: -12%;
+	width: 26%;
+	height: 25%;
+	/* width: 98px;
+  height: 98px; */
+	border-radius: 50%;
+	background-color: white;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	box-shadow: 2px 2px black;
+}
+.signDetailsIcon {
+	width: 58px;
+}
+.signForm {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	gap: 10px;
+	/* flex-wrap: wrap; */
+}
+.signInputRow {
+	/* flex-wrap: wrap; */
+	display: flex;
+	justify-content: center;
+}
+.inputIconContainer {
+	background-color: white;
+	/* background-color: rgb(237, 211, 211); */
+	border-radius: 8px;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	margin: 2px 0px;
+	border-right: 1px black solid;
+	width: 15%;
+	display: flex;
+	justify-content: center;
+}
+.inputIcon {
+	width: 33px;
+}
+.signForm input {
+	background-color: white;
+	/* text-align: center; */
+	font-size: 1.5rem;
+	width: 80%;
+	border-radius: 8px;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	margin: 2px 0px;
+	padding: 8px;
+	border: none;
+}
+.signForm input:focus {
+	outline: none; /* Remove default outline */
+}
+.signButton {
+	margin: 10px 0px;
+	font-size: 1.3rem;
+	border-radius: 3rem;
+	padding: 2% 9%;
+	background-color: #1e083b;
+	color: white;
+}
+@media (max-width: 980px) {
+	.signAvatar p {
+		font-size: 2.5rem;
+		padding: none;
+	}
+	.signAvatar {
+		padding: 0;
+	}
+	.signAvatarContainer svg {
+		width: 100px;
+		height: 100px;
+	}
+	.signDetails {
+		/* margin: 29px 0px; */
+		/* margin-top: 12px; */
+		padding-top: 8%;
+	}
+
+	.signDetailsIconContainer {
+		width: 21%;
+		height: 21%;
+		top: -7%;
+	}
+
+	.signForm input {
+		font-size: 1.2rem;
+		width: 80%;
+	}
+	.signButton {
+		font-size: 1.2rem;
+	}
+	.signDetailsIcon {
+		width: 40px;
+	}
+}
+@media (max-width: 880px) {
+	.signAvatar p {
+		font-size: 2rem;
+	}
+	.signAvatar {
+		padding: 0;
+	}
+	.signAvatarContainer {
+		padding-left: 4.5%;
+	}
+	.signAvatarContainer svg {
+		width: 95px;
+		height: 95px;
+	}
+	.signDetailsIconContainer {
+		width: 50px;
+		height: 50px;
+	}
+	.signDetails {
+		margin: 0px 0px;
+		padding-top: 7%;
+	}
+	.signDetailsIcon {
+		width: 30px;
+	}
+	.inputIcon {
+		width: 33px;
+	}
+	.signForm input {
+		font-size: 0.9rem;
+		width: 80%;
+	}
+	.signButton {
+		font-size: 0.9rem;
+	}
+}
+/* @media (max-width: 700px) {
+  .signAvatar p {
+    font-size: 1.5rem;
+  }
+  .signAvatarContainer svg {
+    width: 100px;
+    height: 100px;
+  }
+  .signDetailsIconContainer {
+    width: 55px;
+    height: 55px;
+  }
+  .signDetailsIcon {
+    width: 25px;
+  }
+  .inputIcon {
+    width: 33px;
+  }
+  .signForm input {
+    font-size: 0.6rem;
+    width: 80%;
+  }
+  .signButton {
+    font-size: 0.6rem;
+  }
+  .signPageSwitch {
+    font-size: 0.6rem;
+  }
+} */
+@media (max-width: 700px) {
+	.signUpContainer {
+		flex-direction: column;
+		background-color: #1e083b;
+		width: 90%;
+		box-shadow: 7px 7px rgb(214, 210, 210);
+		justify-content: center;
+	}
+	.signAvatar {
+		padding: 0;
+	}
+	.signAvatar {
+		clip-path: none;
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding-top: 12%;
+	}
+	.signAvatarContainer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0;
+	}
+	.signAvatar {
+		/* padding-top: 0; */
+		padding-bottom: 0;
+		flex-direction: column-reverse;
+	}
+	.signAvatar svg {
+		width: 144px;
+		height: 150px;
+	}
+	.signAvatar p {
+		margin-top: 10%;
+		margin-bottom: 0;
+	}
+	.signDetails {
+		background-color: #1e083b;
+		padding-top: 0px;
+		margin: 20px 0px;
+	}
+
+	.signDetailsIconContainer {
+		display: none;
+	}
+	.signForm {
+		gap: 8px;
+	}
+	.signForm input {
+		font-size: 1.1rem;
+		width: 80%;
+	}
+	.signPageSwitch {
+		color: white;
+		text-align: center;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+	.signPageSwitch a {
+		margin-left: 7px;
+		color: red;
+	}
+	.signButton {
+		margin-top: 20px;
+		margin-bottom: 17px;
+		font-size: 1rem;
+		background-color: white;
+		color: black;
+		box-shadow: 2px 2.5px rgb(145, 141, 141);
+		border: none;
+	}
+}

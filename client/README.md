@@ -1,0 +1,13 @@
+Environment Variables:
+VITE_API_HOST
+VITE_STRIPE_PUBLIC_KEY
+VITE_apiKey
+VITE_authDomain
+VITE_projectId
+VITE_storageBucket
+VITE_messagingSenderId
+VITE_appId
+
+Admin account
+email:admin@admin.com
+password:123456

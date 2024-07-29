@@ -1,0 +1,224 @@
+.header {
+	margin: 0;
+	display: flex;
+	justify-content: space-between;
+	padding: 7px;
+	flex: 1;
+	/* width: 100%; */
+	flex-wrap: wrap;
+}
+
+.headerLogoContainer {
+	width: 85px;
+	height: 50px;
+}
+
+.headerLogoContainer img {
+	width: 100%;
+	height: 100%;
+}
+
+.hamburgerMenuBar {
+	display: none;
+}
+
+.headerLinks {
+	display: flex;
+	transition: max-height 0.3s ease;
+}
+
+.headerPagesLinks {
+	display: flex;
+	gap: 20px;
+	flex: 1;
+	justify-content: center;
+	align-items: center;
+}
+
+.headerPagesLinks a {
+	color: black;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	width: fit-content;
+	font-size: 1.2rem;
+}
+
+.headerLogos {
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	margin-right: 7px;
+	gap: 7px;
+}
+
+.searchContainer {
+	display: flex;
+	align-items: center;
+	/* position: relative; */
+}
+
+.searchFormInline {
+	display: flex;
+}
+
+.searchFormInline input {
+	padding: 5px;
+	margin-right: 10px;
+	margin-left: 10px;
+	font-size: 1rem;
+}
+
+/* .headerLogos > div {
+	width: fit-content;
+	height: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+} */
+
+.headerProfileText {
+	display: none;
+}
+
+.headerProfile {
+	position: relative;
+	cursor: pointer;
+}
+
+.dropdownMenu {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background-color: white;
+	border: 1px solid #ccc;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 1000;
+	width: 200px;
+	display: flex;
+	flex-direction: column;
+	margin-top: 10px;
+}
+
+.dropdownMenu a,
+.dropdownMenu div {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	color: black;
+	text-decoration: none;
+	transition: background-color 0.3s ease;
+}
+
+.dropdownMenu a:hover,
+.dropdownMenu div:hover {
+	background-color: #f0f0f0;
+}
+
+.dropdownMenu a > svg,
+.dropdownMenu div > svg {
+	margin-right: 10px;
+} /* Media queries for responsiveness */
+.headerRightPart {
+	display: flex;
+	justify-content: right;
+	align-items: center;
+}
+@media (max-width: 780px) {
+	.header {
+		flex-direction: row;
+	}
+
+	.headerLogo {
+		width: 50%;
+	}
+
+	.headerRightPart {
+		/* flex: 0.5;  */
+		width: 50%;
+		/* flex-basis: 50%; */
+	}
+
+	.headerLogos {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+	}
+
+	.headerProfile a {
+		display: flex;
+		color: black;
+		justify-content: center;
+		align-items: center;
+		gap: 5px;
+	}
+
+	.hamburgerMenuBar {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.hamburgerMenu {
+		display: flex;
+		align-items: center;
+	}
+
+	.headerLinks {
+		flex-direction: column;
+		background-color: rgba(215, 210, 210, 0.8);
+		max-height: 0;
+		overflow: hidden;
+		flex-basis: 100%;
+		width: 100%;
+		order: 3;
+	}
+
+	.headerLinks.open {
+		max-height: 500px;
+	}
+
+	.headerLinksDivision {
+		display: none;
+	}
+
+	.headerPagesLinks {
+		flex-direction: column;
+		margin: 15px 0;
+	}
+
+	.hamburgerMenuLinks {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 10px;
+	}
+
+	.hamburgerMenuLinks a {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		color: black;
+	}
+
+	.headerProfileText {
+		display: flex;
+	}
+
+	.dropdownMenu,
+	.dropdownMenu div {
+		/* width: 100%; */
+		display: flex;
+		justify-content: center;
+	}
+	.searchFormInline input {
+		font-size: 1rem;
+	}
+}
+@media (max-width: 400px) {
+	.searchFormInline input {
+		font-size: 0.4rem;
+	}
+}
