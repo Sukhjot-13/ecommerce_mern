@@ -17,6 +17,9 @@ exports.createOrder = async (req, res) => {
 };
 exports.getAllOrders = async (req, res) => {
   try {
+    if (!req.query.userId) {
+      return res.status(400).json({ error: "userId query param is required" });
+    }
     const orders = await Order.find({ user: req.query.userId }).populate(
       "items.productId"
     );

@@ -3,13 +3,12 @@ import {
 	AlertDescription,
 	AlertIcon,
 	AlertTitle,
-	effect,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 function Success() {
-	navigate = useNavigate();
+	const navigate = useNavigate();
 	useEffect(() => {
 		setTimeout(() => {
 			navigate("/");

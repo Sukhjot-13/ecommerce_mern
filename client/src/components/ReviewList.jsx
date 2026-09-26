@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Box, Text, Button, Stack } from "@chakra-ui/react";
 
 function ReviewList({ reviews }) {
+	const safeReviews = Array.isArray(reviews) ? reviews : [];
 	const [currentPage, setCurrentPage] = useState(1);
 	const reviewsPerPage = 5;
 
 	const indexOfLastReview = currentPage * reviewsPerPage;
 	const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
-	const currentReviews = reviews.slice(indexOfFirstReview, indexOfLastReview);
+	const currentReviews = safeReviews.slice(indexOfFirstReview, indexOfLastReview);
 
 	const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -34,7 +35,7 @@ function ReviewList({ reviews }) {
 			)}
 			<Stack direction="row" spacing={4} mt={4}>
 				{Array.from({
-					length: Math.ceil(reviews.length / reviewsPerPage),
+					length: Math.ceil(safeReviews.length / reviewsPerPage),
 				}).map((_, index) => (
 					<Button
 						key={index}

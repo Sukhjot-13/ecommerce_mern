@@ -112,7 +112,7 @@ function ProductDetail() {
 						useKeyboardArrows
 						autoPlay
 					>
-						{product.images.map((image, index) => (
+						{(product.images || []).map((image, index) => (
 							<div key={index}>
 								<Image
 									src={`${
@@ -143,7 +143,7 @@ function ProductDetail() {
 								Category
 							</Heading>
 							<Text fontSize="lg" color="gray.700">
-								{product.category.name}
+								{product.category?.name || "Uncategorized"}
 							</Text>
 						</Box>
 						<Box>
@@ -183,7 +183,7 @@ function ProductDetail() {
 					Tags
 				</Heading>
 				<List spacing={2} styleType="disc">
-					{product.tags.map((tag, index) => (
+					{(product.tags || []).map((tag, index) => (
 						<ListItem key={index} fontSize="lg" color="gray.700">
 							{tag}
 						</ListItem>
@@ -195,7 +195,7 @@ function ProductDetail() {
 					Features
 				</Heading>
 				<List spacing={2} styleType="disc">
-					{product.additionalFeatures.map((feature, index) => (
+					{(product.additionalFeatures || []).map((feature, index) => (
 						<ListItem key={index} fontSize="lg" color="gray.700">
 							{feature}
 						</ListItem>

@@ -31,8 +31,10 @@ exports.getAllProducts = async (req, res, next) => {
         .limitFields()
         .search();
 
-      // Count all documents that match the filters and search criteria
-      const totalResults = await Product.countDocuments(features.query);
+      // Count all documents that match the filters and search criteria.
+      // NOTE: countDocuments takes a filter object — pass the built query's
+      // filter via getQuery(), never the Query instance itself.
+      const totalResults = await Product.countDocuments(features.query.getQuery());
 
       // Pagination
       const page = req.query.page * 1 || 1;
@@ -55,6 +57,16 @@ exports.getAllProducts = async (req, res, next) => {
 };
 
 exports.createProduct = async (req, res) => {
+  const parseJsonArray = (value, field) => {
+    if (value === undefined || value === null || value === "") return [];
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch {
+      throw new Error(`Invalid JSON for field '${field}'`);
+    }
+  };
+
   try {
     // Extract data from the request
     const {
@@ -67,8 +79,12 @@ exports.createProduct = async (req, res) => {
       features,
     } = req.body;
 
-    // Handle files (can be single or multiple)
-    const images = req.files.map((file) => file.path);
+    if (!category) {
+      return res.status(400).json({ error: "Category is required" });
+    }
+
+    // Handle files (can be single or multiple; empty when none uploaded)
+    const images = (req.files || []).map((file) => file.path);
 
     // Log the extracted data
     console.log("Brand Name:", brandName);
@@ -76,8 +92,8 @@ exports.createProduct = async (req, res) => {
     console.log("Category:", category);
     console.log("Price:", price);
     console.log("Description:", description);
-    console.log("Tags:", JSON.parse(tags));
-    console.log("Features:", JSON.parse(features));
+    console.log("Tags:", parseJsonArray(tags, "tags"));
+    console.log("Features:", parseJsonArray(features, "features"));
     console.log("Images:", images);
 
     // Create the product object
@@ -87,8 +103,8 @@ exports.createProduct = async (req, res) => {
       category,
       price,
       description,
-      tags: JSON.parse(tags),
-      additionalFeatures: JSON.parse(features), // Added additional features
+      tags: parseJsonArray(tags, "tags"),
+      additionalFeatures: parseJsonArray(features, "features"), // Added additional features
       images, // Assuming you store multiple image paths in the database
     };
 

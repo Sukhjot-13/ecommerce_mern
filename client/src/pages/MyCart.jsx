@@ -82,11 +82,13 @@ const CheckoutForm = ({ totalAmount, cartProducts, onClose }) => {
 						isClosable: true,
 					});
 					console.log("Payment succeeded!");
-					// Prepare items array
-					const items = cartProducts.map((product) => ({
-						productId: product._id,
-						quantity: product.quantity,
-						price: product.product.price,
+					// Prepare items array (line items carry the populated
+					// product under `.product` — use its _id, not the
+					// cart-line subdocument _id)
+					const items = cartProducts.map((line) => ({
+						productId: line.product._id,
+						quantity: line.quantity,
+						price: line.product.price,
 					}));
 
 					// Save order to the backend

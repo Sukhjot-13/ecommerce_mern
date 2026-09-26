@@ -75,7 +75,19 @@ const Cart = require("../models/cartModel");
 const User = require("../models/userModel");
 
 exports.addToCart = async (req, res) => {
-  const { id, productId, quantity } = req.body;
+  const { id, productId, quantity = 1 } = req.body;
+  const qty = Number(quantity);
+
+  if (!id || !productId) {
+    return res
+      .status(400)
+      .json({ success: false, error: "id and productId are required" });
+  }
+  if (!Number.isInteger(qty) || qty === 0) {
+    return res
+      .status(400)
+      .json({ success: false, error: "quantity must be a non-zero integer" });
+  }
 
   try {
     let cart = await Cart.findOne({ user: id });
@@ -89,12 +101,12 @@ exports.addToCart = async (req, res) => {
     );
 
     if (productIndex >= 0) {
-      cart.products[productIndex].quantity += quantity;
+      cart.products[productIndex].quantity += qty;
       if (cart.products[productIndex].quantity <= 0) {
         cart.products.splice(productIndex, 1);
       }
     } else {
-      cart.products.push({ product: productId, quantity });
+      cart.products.push({ product: productId, quantity: qty });
     }
 
     await cart.save();
