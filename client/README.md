@@ -9,5 +9,9 @@ VITE_messagingSenderId
 VITE_appId
 
 Admin account
-email:admin@admin.com
-password:123456
+
+> Admin access is granted via the `role: "admin"` field on the User document
+> in MongoDB (set it directly in the database for your own user). Default
+> credentials must never be committed — the previous placeholder
+> (admin@admin.com / 123456) was removed. If that account exists in any real
+> database, rotate or delete it immediately.

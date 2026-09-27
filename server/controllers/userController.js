@@ -1,14 +1,5 @@
 const User = require("./../models/userModel");
-const bcrypt = require("bcrypt");
-const hashPassword = async (password) => {
-  const saltRounds = 10;
-  try {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    return hashedPassword;
-  } catch (err) {
-    throw new Error("Error hashing password");
-  }
-};
+// NOTE: password signup was removed (Firebase handles auth) — no bcrypt use.
 
 // exports.createUser = async (req, res) => {
 //   try {
@@ -67,7 +58,9 @@ exports.createUser = async (req, res) => {
   }
 };
 exports.getUserId = async (req, res) => {
-  const { email } = req.body;
+  // Read-only lookup by email. Served as GET /getUserId?email= (preferred);
+  // POST /getUserId with { email } is kept as a legacy alias.
+  const email = req.query.email || req.body.email;
   console.log(email);
   try {
     const user = await User.findOne({ email });

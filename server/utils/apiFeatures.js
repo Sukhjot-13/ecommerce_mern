@@ -102,18 +102,8 @@ class APIFeatures {
     return this;
   }
 
-  paginate() {
-    const page = this.queryString.page * 1 || 1;
-    const limit = this.queryString.limit * 1 || 2;
-    const skip = (page - 1) * limit;
-    this.query = this.query.skip(skip).limit(limit);
-
-    // Update queryStr to include pagination info
-    this.queryStr.page = page;
-    this.queryStr.limit = limit;
-
-    return this;
-  }
+  // NOTE: pagination lives in productController (manual skip/limit,
+  // default 8) — no paginate() helper here to avoid two divergent defaults.
 
   search() {
     if (this.queryString.search) {

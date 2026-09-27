@@ -19,11 +19,11 @@ export const UserContextProvider = ({ children }) => {
 						uid: user.uid,
 						email: user.email,
 					};
-					const response = await axios.post(
+					const response = await axios.get(
 						`${
 							import.meta.env.VITE_API_HOST
 						}/api/v1/users/getUserId`,
-						{ email: user.email }
+						{ params: { email: user.email } }
 					);
 
 					const userId = response.data._id;
@@ -35,15 +35,22 @@ export const UserContextProvider = ({ children }) => {
 						role: userRole,
 					};
 					gSetUser(completeUserData);
+					// Every API call carries the caller's backend user id so
+					// server ownership/admin guards (requireOwner/requireAdmin)
+					// can enforce it. Stopgap until Firebase ID-token
+					// verification lands server-side.
+					axios.defaults.headers.common["x-user-id"] = userId;
 					document.cookie = `uid=${userId}; path=/; max-age=3600`;
 				} catch (error) {
 					console.error(
 						"Error fetching user ID from backend:",
 						error
 					);
+					delete axios.defaults.headers.common["x-user-id"];
 					gSetUser(null);
 				}
 			} else {
+				delete axios.defaults.headers.common["x-user-id"];
 				gSetUser(null);
 				document.cookie = "uid=; path=/; max-age=0";
 			}

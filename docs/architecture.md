@@ -33,7 +33,7 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 - `server/server.js` — Purpose: process entrypoint; validates `DATABASE`/`DATABASE_PASSWORD`, connects Mongoose, listens on `PORT`. No exports.
 - `server/app.js` — Purpose: Express app wiring (json, morgan, cors, `/images` static, 7 routers). Exports: the `app` instance.
 - `server/.env.example` — Purpose: template for the 6 server env vars (never commit real values). No functions.
-- `server/package.json` / `server/package-lock.json` — Purpose: manifest/lock (`express`, `mongoose`, `stripe`, `multer`, `bcrypt`, `cors`, `dotenv`, `morgan`, `slugify`; dev `nodemon`; `start: nodemon server.js`).
+- `server/package.json` / `server/package-lock.json` — Purpose: manifest/lock (`express`, `mongoose`, `stripe`, `multer`, `cors`, `dotenv`, `morgan`, `slugify`; dev `nodemon`, `vitest`; `start: nodemon server.js`, `test: vitest run`).
 - `server/.gitignore` — Purpose: ignores `node_modules`, `.env`.
 - `server/README.md` — Purpose: lists 4 env vars (stale: omits `CLIENT_URL`, `SERVER_URL`).
 - `server/images/*` (~60 files, e.g. `images-1722218*.jpeg/avif/png`) — Purpose: Multer-uploaded product photos served via `/images`. No functions.
@@ -41,9 +41,8 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 ### server/controllers/*.js
 
 - `server/controllers/userController.js` — Purpose: user CRUD backed by Firebase `uid`.
-  - `hashPassword(password)` — bcrypt-hash helper (currently unused; `createUser` no longer takes a password).
-  - `createUser(req, res)` — creates User from `{userName, email, uid}` → 201.
-  - `getUserId(req, res)` — looks up user by `{email}` body → `{_id, role}` (used by `UserContext` to hydrate session).
+    - `createUser(req, res)` — creates User from `{userName, email, uid}` → 201.
+  - `getUserId(req, res)` — looks up user by `?email=` query (legacy `POST {email}` alias kept) → `{_id, role}` (used by `UserContext` to hydrate session).
   - `getUserById(req, res)` — `GET /:userId` → full user doc.
 - `server/controllers/productController.js` — Purpose: product catalog + creation.
   - `getAllProducts(req, res)` — dual mode: with `slug` param returns one product (populates `reviews.user.userName`, `category`); without returns paginated/filtered list via `APIFeatures` (`totalResults` via `getQuery()`, manual `skip/limit`, default limit 8).
@@ -53,10 +52,10 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
   - `getCart(req, res)` — `GET /:userId`, populates `products.product`.
   - `removeFromCart(req, res)` — `{id, productId}` filters the line out.
 - `server/controllers/orderController.js` — Purpose: order persistence/query.
-  - `createOrder(req, res)` — saves `{user: userId, paymentIntentId, items, orderTotal}` → 201.
+  - `createOrder(req, res)` — validates userId/paymentIntentId/items, reloads Product prices, recomputes `orderTotal` via `computeOrderTotal` (client total never trusted), saves → 201. Route guarded by `requireOwner`.
   - `getAllOrders(req, res)` — requires `?userId`, returns that user's orders with `items.productId` populated.
 - `server/controllers/paymentController.js` — Purpose: Stripe flows; reads `STRIPE_SECRET_KEY`, `CLIENT_URL`, `SERVER_URL`.
-  - `createCheckoutSession(req, res)` — creates checkout session from client `line_items`; optional `{email, userId, items}` carried into `metadata`; `success_url` points at server `/payment/success`.
+  - `createCheckoutSession(req, res)` — requires `items [{productId, quantity}]`; builds Stripe `line_items` server-side from Product prices (client arrays never forwarded); optional `{email, userId}` carried into `metadata` with a server-priced snapshot; `success_url` points at server `/payment/success`.
   - `successPayment(req, res)` — retrieves session + line items; resolves buyer via `metadata.userId` then email lookup (400 if unresolvable); parses `metadata.items` into schema-valid `{productId, quantity, price}` (400 if empty); saves Order; redirects to `${CLIENT_URL}/success`.
   - `paymentIntent(req, res)` — validates positive numeric `amount`; creates USD card PaymentIntent; returns `client_secret`.
 - `server/controllers/reviewController.js` — Purpose: product reviews.
@@ -77,7 +76,7 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 
 ### server/routes/*.js (no functions; map HTTP → controller)
 
-- `server/routes/userRoutes.js` — `POST /` → `createUser`; `GET /:userId` → `getUserById`; `POST /getUserId` → `getUserId`. Mounted at `/api/v1/users`.
+- `server/routes/userRoutes.js` — `POST /` → `createUser`; `GET /getUserId?email=` → `getUserId` (POST alias kept); `GET /:userId` → `getUserById` (registered last so it never swallows `/getUserId`). Mounted at `/api/v1/users`.
 - `server/routes/productRoutes.js` — `GET|POST /:slug?` → `getAllProducts` / `uploadFiles + createProduct`. Mounted at `/api/v1/products`.
 - `server/routes/cartRoutes.js` — `POST /add`, `GET /:userId`, `POST /remove`. Mounted at `/api/v1/cart`.
 - `server/routes/orderRoutes.js` — `POST /` → `createOrder`; `GET /` → `getAllOrders(?userId=)`. Mounted at `/api/v1/order`.
@@ -87,8 +86,11 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 
 ### server/utils/*.js
 
-- `server/utils/apiFeatures.js` — Purpose: chainable Mongo query builder. Class `APIFeatures` (`constructor(query, queryString)`, `filter()` strips page/sort/limit/fields/search + gte/gt/lte/lt operators, `sort()` default `-createdAt`, `limitFields()` default `-__v`, `paginate()` default limit 2 — unused by productController which paginates manually, `search()` regex over name/description/tags/brand).
+- `server/utils/apiFeatures.js` — Purpose: chainable Mongo query builder. Class `APIFeatures` (`constructor(query, queryString)`, `filter()` strips page/sort/limit/fields/search + gte/gt/lte/lt operators, `sort()` default `-createdAt`, `limitFields()` default `-__v`, `search()` regex over name/description/tags/brand).
 - `server/utils/multerConfig.js` — Purpose: upload middleware. `storage` (disk → `images/`, unique `fieldname-timestamp-rand+ext` filenames); exports `uploadFiles` (array of up to 5 `images` files).
+- `server/utils/authGuard.js` (2026-09-26) — Purpose: ownership/admin enforcement (stopgap until Firebase ID-token verification). `callerId(req)` (header → body → query); `requireAdmin` (x-user-id must belong to role-`admin` user); `requireOwner(getTargetId)` (header must equal + exist). Guards product/category create, cart, order, review-write routes.
+- `server/utils/orderTotals.js` (2026-09-26) — Purpose: pure order math. `computeOrderTotal(lines)` (validates price/qty, rounds to cents). Used by `createOrder` after server-side price reload so client totals are never trusted.
+- `server/tests/orderTotals.test.js` (2026-09-26) — Purpose: vitest suite (6 tests) for `computeOrderTotal`. Run via server `npm test`.
 
 ## Client
 
@@ -96,7 +98,7 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 - `client/vite.config.js` — Purpose: Vite + React plugin; dev server port 3000. Exports: default config.
 - `client/.eslintrc.cjs` — Purpose: eslint flat-legacy config (react, hooks, refresh; ignores `dist`).
 - `client/.gitignore` — Purpose: ignores `node_modules`, `dist`, `.env`, editor files.
-- `client/README.md` — Purpose: lists all 8 `VITE_*` vars + default admin credentials (`admin@admin.com`/`123456`).
+- `client/README.md` — Purpose: lists all 8 `VITE_*` vars. Admin access = `role: "admin"` set directly in MongoDB (placeholder creds removed 2026-09-26).
 - `client/index.html` — Purpose: HTML shell (`#root`, `/src/main.jsx`, fonts, ShopSphere title/icon).
 - `client/public/shopSphereLogo.png`, `client/public/vite.svg` — Purpose: static public assets.
 - `client/src/assets/react.svg`, `client/src/assets/images/*` (`shopSphereLogo.png`, `shopSphere.png`, `logoWhite.jpeg`, `ecoFriendly.jpg`, `summer.png`, `summerCollection.png`) — Purpose: bundled brand/illustration images (logo in Header/Footer, `ecoFriendly` in Home eco banner).
@@ -104,7 +106,7 @@ Reference: `server/.env.example` lists all 6 server vars. Gap: `server/README.md
 - `client/src/App.jsx` — Purpose: layout shell (`ChakraProvider` + `Header` + `Outlet` + `Footer`). `App()` takes no props.
 - `client/src/App.css`, `client/src/index.css` — Purpose: global styles (Anaheim font, body bg).
 - `client/src/firebase.js` — Purpose: Firebase init from 6 `VITE_*` vars. Exports: `auth`.
-- `client/src/context/UserContext.jsx` — Purpose: session state. `UserContextProvider({children})` subscribes `onAuthStateChanged`, hydrates `{uid, email, _id, role}` via `POST /users/getUserId`, manages `uid` cookie + `loading`; `logOut()` signs out of Firebase; `useUserData()` returns `{gUser, gSetUser, logOut, loading}`.
+- `client/src/context/UserContext.jsx` — Purpose: session state. `UserContextProvider({children})` subscribes `onAuthStateChanged`, hydrates `{uid, email, _id, role}` via `GET /users/getUserId?email=`, sets the `x-user-id` axios default header for server guards, manages `uid` cookie + `loading`; `logOut()` signs out of Firebase; `useUserData()` returns `{gUser, gSetUser, logOut, loading}`.
 - `client/src/utils/Router.jsx` — Purpose: route table. Exports `router`: `/` Home, `/login`, `/register`, private (`myCart`, `profile`, `success`), admin (`createProduct`), public `/products`, `/products/:slug`.
 - `client/src/utils/PrivateRoutes.jsx` — Purpose: client-side guards. `PrivateRoutes()` (requires `gUser`, else `/login`); `AdminRoutes()` (requires `gUser.role === "admin"`, else `/`); both show `Loading...` while `loading`.
 

@@ -7,18 +7,64 @@ const SERVER_URL = process.env.SERVER_URL || "http://localhost:8080";
 
 exports.createCheckoutSession = async (req, res) => {
   try {
-    // Optional: { email, userId, items: [{ productId, quantity, price }] }
-    // When userId + items are supplied they are carried in metadata so the
-    // success handler can persist a schema-valid order.
+    // Optional: { email, userId, items: [{ productId, quantity }] }
+    // Line items are ALWAYS built server-side from Product prices — a
+    // client-supplied line_items array is never forwarded to Stripe.
+    // userId + items ride in metadata so the success handler can persist a
+    // schema-valid order.
     const { email, userId, items } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "items (productId + quantity) are required",
+      });
+    }
+    const Product = require("../models/productModel");
+    const line_items = await Promise.all(
+      items.map(async (item, i) => {
+        if (!item || !item.productId) {
+          throw new Error(`items[${i}].productId is required`);
+        }
+        const qty = Number(item.quantity);
+        if (!Number.isInteger(qty) || qty < 1) {
+          throw new Error(`items[${i}].quantity must be a positive integer`);
+        }
+        const product = await Product.findById(item.productId).lean();
+        if (!product) {
+          throw new Error(`Unknown product: ${item.productId}`);
+        }
+        return {
+          price_data: {
+            currency: "usd",
+            product_data: { name: product.name },
+            unit_amount: Math.round(Number(product.price) * 100),
+          },
+          quantity: qty,
+        };
+      })
+    );
+    // Snapshot server-resolved prices into metadata so successPayment
+    // persists exactly what was charged (never client prices).
+    const pricedSnapshot = await Promise.all(
+      items.map(async (item) => {
+        const product = await Product.findById(item.productId)
+          .select("price")
+          .lean();
+        return {
+          productId: String(item.productId),
+          quantity: Number(item.quantity),
+          price: Number(product.price),
+        };
+      })
+    );
     const session = await stripe.checkout.sessions.create({
-      line_items: req.body.line_items,
+      line_items,
       mode: "payment",
       success_url: `${SERVER_URL}/api/v1/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${CLIENT_URL}/cancel`,
       ...(email ? { customer_email: email } : {}),
       ...(userId || items
-        ? { metadata: { userId: userId || "", items: JSON.stringify(items || []) } }
+        ? { metadata: { userId: userId || "", items: JSON.stringify(pricedSnapshot) } }
         : {}),
     });
     res.send({ status: "success", url: session.url });
